@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+// Structure for message
+struct message {
+    long message_type;
+    char message_text[100];
+};
+
+int main() {
+    key_t key;
+    int msgid;
+
+    // Generate the same key as sender process
+    key = ftok("progfile", 65);
+
+    // Access the message queue
+    msgid = msgget(key, 0666 | IPC_CREAT);
+
+    struct message msg;
+
+    // Receive the message
+    msgrcv(msgid, &msg, sizeof(msg.message_text), 1, 0);
+
+    printf("Message received: %s\n", msg.message_text);
+
+    // Destroy the message queue
+    msgctl(msgid, IPC_RMID, NULL);
+
+    return 0;
+}
