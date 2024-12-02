@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_FILES 100
+#define NAME_LEN 50
+
+// Structure to represent a file
+struct File {
+    char name[NAME_LEN];
+};
+
+// Array to store files and a variable to track the number of files
+struct File directory[MAX_FILES];
+int fileCount = 0;
+
+// Function to create a file
+void createFile() {
+    if (fileCount >= MAX_FILES) {
+        printf("Directory is full! Cannot create more files.\n");
+        return;
+    }
+
+    char fileName[NAME_LEN];
+    printf("Enter the name of the file to create: ");
+    scanf("%s", fileName);
+
+    // Check for duplicate file names
+    for (int i = 0; i < fileCount; i++) {
+        if (strcmp(directory[i].name, fileName) == 0) {
+            printf("File '%s' already exists!\n", fileName);
+            return;
+        }
+    }
+
+    // Add the new file to the directory
+    strcpy(directory[fileCount].name, fileName);
+    fileCount++;
+    printf("File '%s' created successfully.\n", fileName);
+}
+
+// Function to delete a file
+void deleteFile() {
+    if (fileCount == 0) {
+        printf("Directory is empty! No files to delete.\n");
+        return;
+    }
+
+    char fileName[NAME_LEN];
+    printf("Enter the name of the file to delete: ");
+    scanf("%s", fileName);
+
+    // Find and delete the file
+    for (int i = 0; i < fileCount; i++) {
+        if (strcmp(directory[i].name, fileName) == 0) {
+            // Shift files to fill the gap
+            for (int j = i; j < fileCount - 1; j++) {
+                strcpy(directory[j].name, directory[j + 1].name);
+            }
+            fileCount--;
+            printf("File '%s' deleted successfully.\n", fileName);
+            return;
+        }
+    }
+
+    printf("File '%s' not found!\n", fileName);
+}
+
+// Function to display all files in the directory
+void displayFiles() {
+    if (fileCount == 0) {
+        printf("Directory is empty! No files to display.\n");
+        return;
+    }
+
+    printf("Files in the directory:\n");
+    for (int i = 0; i < fileCount; i++) {
+        printf("%d. %s\n", i + 1, directory[i].name);
+    }
+}
+
+int main() {
+    int choice;
+
+    printf("Single-Level Directory Simulation\n");
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Create File\n");
+        printf("2. Delete File\n");
+        printf("3. Display Files\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                createFile();
+                break;
+            case 2:
+                deleteFile();
+                break;
+            case 3:
+                displayFiles();
+                break;
+            case 4:
+                printf("Exiting program.\n");
+                return 0;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
