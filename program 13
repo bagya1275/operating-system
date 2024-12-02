@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <limits.h>
+
+// Function to implement First Fit
+void firstFit(int blockSize[], int m, int processSize[], int n) {
+    int allocation[n];
+    for (int i = 0; i < n; i++)
+        allocation[i] = -1; // Initialize allocation array
+
+    for (int i = 0; i < n; i++) { // For each process
+        for (int j = 0; j < m; j++) { // Check each block
+            if (blockSize[j] >= processSize[i]) {
+                allocation[i] = j; // Assign block j to process i
+                blockSize[j] -= processSize[i]; // Reduce available block size
+                break;
+            }
+        }
+    }
+
+    printf("\nFirst Fit Allocation:\n");
+    printf("Process No.\tProcess Size\tBlock No.\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t\t%d\t\t", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("%d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+// Function to implement Best Fit
+void bestFit(int blockSize[], int m, int processSize[], int n) {
+    int allocation[n];
+    for (int i = 0; i < n; i++)
+        allocation[i] = -1; // Initialize allocation array
+
+    for (int i = 0; i < n; i++) { // For each process
+        int bestIdx = -1;
+        for (int j = 0; j < m; j++) { // Find the best block
+            if (blockSize[j] >= processSize[i]) {
+                if (bestIdx == -1 || blockSize[j] < blockSize[bestIdx])
+                    bestIdx = j;
+            }
+        }
+
+        if (bestIdx != -1) {
+            allocation[i] = bestIdx; // Assign block
+            blockSize[bestIdx] -= processSize[i]; // Reduce block size
+        }
+    }
+
+    printf("\nBest Fit Allocation:\n");
+    printf("Process No.\tProcess Size\tBlock No.\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t\t%d\t\t", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("%d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+// Function to implement Worst Fit
+void worstFit(int blockSize[], int m, int processSize[], int n) {
+    int allocation[n];
+    for (int i = 0; i < n; i++)
+        allocation[i] = -1; // Initialize allocation array
+
+    for (int i = 0; i < n; i++) { // For each process
+        int worstIdx = -1;
+        for (int j = 0; j < m; j++) { // Find the worst block
+            if (blockSize[j] >= processSize[i]) {
+                if (worstIdx == -1 || blockSize[j] > blockSize[worstIdx])
+                    worstIdx = j;
+            }
+        }
+
+        if (worstIdx != -1) {
+            allocation[i] = worstIdx; // Assign block
+            blockSize[worstIdx] -= processSize[i]; // Reduce block size
+        }
+    }
+
+    printf("\nWorst Fit Allocation:\n");
+    printf("Process No.\tProcess Size\tBlock No.\n");
+    for (int i = 0; i < n; i++) {
+        printf("%d\t\t%d\t\t", i + 1, processSize[i]);
+        if (allocation[i] != -1)
+            printf("%d\n", allocation[i] + 1);
+        else
+            printf("Not Allocated\n");
+    }
+}
+
+int main() {
+    int blockSize[] = {100, 500, 200, 300, 600};
+    int processSize[] = {212, 417, 112, 426};
+    int m = sizeof(blockSize) / sizeof(blockSize[0]);
+    int n = sizeof(processSize) / sizeof(processSize[0]);
+
+    // Duplicate block sizes for each algorithm as they modify them
+    int blockSizeFF[m], blockSizeBF[m], blockSizeWF[m];
+    for (int i = 0; i < m; i++) {
+        blockSizeFF[i] = blockSize[i];
+        blockSizeBF[i] = blockSize[i];
+        blockSizeWF[i] = blockSize[i];
+    }
+
+    firstFit(blockSizeFF, m, processSize, n);
+    bestFit(blockSizeBF, m, processSize, n);
+    worstFit(blockSizeWF, m, processSize, n);
+
+    return 0;
+}
