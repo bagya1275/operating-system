@@ -1,0 +1,210 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_SUBDIRS 10
+#define MAX_FILES 10
+#define NAME_LEN 50
+
+// Structure to represent a file
+struct File {
+    char name[NAME_LEN];
+};
+
+// Structure to represent a subdirectory
+struct SubDirectory {
+    char name[NAME_LEN];
+    struct File files[MAX_FILES];
+    int fileCount;
+};
+
+// Structure to represent the root directory containing subdirectories
+struct Directory {
+    struct SubDirectory subDirs[MAX_SUBDIRS];
+    int subDirCount;
+};
+
+// Function to create a subdirectory
+void createSubDir(struct Directory *dir) {
+    if (dir->subDirCount >= MAX_SUBDIRS) {
+        printf("Cannot create more subdirectories! Max limit reached.\n");
+        return;
+    }
+
+    char subDirName[NAME_LEN];
+    printf("Enter the name of the subdirectory to create: ");
+    scanf("%s", subDirName);
+
+    // Check for duplicate subdirectory names
+    for (int i = 0; i < dir->subDirCount; i++) {
+        if (strcmp(dir->subDirs[i].name, subDirName) == 0) {
+            printf("Subdirectory '%s' already exists!\n", subDirName);
+            return;
+        }
+    }
+
+    // Add new subdirectory to the directory
+    strcpy(dir->subDirs[dir->subDirCount].name, subDirName);
+    dir->subDirs[dir->subDirCount].fileCount = 0; // Initialize file count for subdirectory
+    dir->subDirCount++;
+    printf("Subdirectory '%s' created successfully.\n", subDirName);
+}
+
+// Function to create a file in a subdirectory
+void createFile(struct Directory *dir) {
+    char subDirName[NAME_LEN];
+    printf("Enter the subdirectory name where you want to create the file: ");
+    scanf("%s", subDirName);
+
+    // Find the subdirectory
+    int subDirIndex = -1;
+    for (int i = 0; i < dir->subDirCount; i++) {
+        if (strcmp(dir->subDirs[i].name, subDirName) == 0) {
+            subDirIndex = i;
+            break;
+        }
+    }
+
+    if (subDirIndex == -1) {
+        printf("Subdirectory '%s' not found!\n", subDirName);
+        return;
+    }
+
+    struct SubDirectory *subDir = &dir->subDirs[subDirIndex];
+    if (subDir->fileCount >= MAX_FILES) {
+        printf("Cannot add more files to subdirectory '%s'. Max file limit reached.\n", subDirName);
+        return;
+    }
+
+    char fileName[NAME_LEN];
+    printf("Enter the name of the file to create: ");
+    scanf("%s", fileName);
+
+    // Check for duplicate file names
+    for (int i = 0; i < subDir->fileCount; i++) {
+        if (strcmp(subDir->files[i].name, fileName) == 0) {
+            printf("File '%s' already exists in subdirectory '%s'!\n", fileName, subDirName);
+            return;
+        }
+    }
+
+    // Add the file to the subdirectory
+    strcpy(subDir->files[subDir->fileCount].name, fileName);
+    subDir->fileCount++;
+    printf("File '%s' created in subdirectory '%s'.\n", fileName, subDirName);
+}
+
+// Function to delete a file from a subdirectory
+void deleteFile(struct Directory *dir) {
+    char subDirName[NAME_LEN], fileName[NAME_LEN];
+    printf("Enter the subdirectory name where the file exists: ");
+    scanf("%s", subDirName);
+
+    // Find the subdirectory
+    int subDirIndex = -1;
+    for (int i = 0; i < dir->subDirCount; i++) {
+        if (strcmp(dir->subDirs[i].name, subDirName) == 0) {
+            subDirIndex = i;
+            break;
+        }
+    }
+
+    if (subDirIndex == -1) {
+        printf("Subdirectory '%s' not found!\n", subDirName);
+        return;
+    }
+
+    struct SubDirectory *subDir = &dir->subDirs[subDirIndex];
+    printf("Enter the file name to delete: ");
+    scanf("%s", fileName);
+
+    // Find and delete the file
+    int fileIndex = -1;
+    for (int i = 0; i < subDir->fileCount; i++) {
+        if (strcmp(subDir->files[i].name, fileName) == 0) {
+            fileIndex = i;
+            break;
+        }
+    }
+
+    if (fileIndex == -1) {
+        printf("File '%s' not found in subdirectory '%s'.\n", fileName, subDirName);
+        return;
+    }
+
+    // Shift files to delete the selected file
+    for (int i = fileIndex; i < subDir->fileCount - 1; i++) {
+        strcpy(subDir->files[i].name, subDir->files[i + 1].name);
+    }
+    subDir->fileCount--;
+    printf("File '%s' deleted from subdirectory '%s'.\n", fileName, subDirName);
+}
+
+// Function to display files in a subdirectory
+void displayFiles(struct Directory *dir) {
+    char subDirName[NAME_LEN];
+    printf("Enter the subdirectory name to view files: ");
+    scanf("%s", subDirName);
+
+    // Find the subdirectory
+    int subDirIndex = -1;
+    for (int i = 0; i < dir->subDirCount; i++) {
+        if (strcmp(dir->subDirs[i].name, subDirName) == 0) {
+            subDirIndex = i;
+            break;
+        }
+    }
+
+    if (subDirIndex == -1) {
+        printf("Subdirectory '%s' not found!\n", subDirName);
+        return;
+    }
+
+    struct SubDirectory *subDir = &dir->subDirs[subDirIndex];
+    if (subDir->fileCount == 0) {
+        printf("No files in subdirectory '%s'.\n", subDirName);
+        return;
+    }
+
+    printf("Files in subdirectory '%s':\n", subDirName);
+    for (int i = 0; i < subDir->fileCount; i++) {
+        printf("%d. %s\n", i + 1, subDir->files[i].name);
+    }
+}
+
+int main() {
+    struct Directory dir = { .subDirCount = 0 };
+    int choice;
+
+    while (1) {
+        printf("\nMenu:\n");
+        printf("1. Create Subdirectory\n");
+        printf("2. Create File in Subdirectory\n");
+        printf("3. Delete File from Subdirectory\n");
+        printf("4. Display Files in Subdirectory\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                createSubDir(&dir);
+                break;
+            case 2:
+                createFile(&dir);
+                break;
+            case 3:
+                deleteFile(&dir);
+                break;
+            case 4:
+                displayFiles(&dir);
+                break;
+            case 5:
+                printf("Exiting program.\n");
+                return 0;
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+
+    return 0;
+}
