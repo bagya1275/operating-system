@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+// Thread function
+void* threadFunction(void* arg) {
+    int threadID = *(int*)arg;
+    printf("Thread %d: Starting...\n", threadID);
+    sleep(2); // Simulate work
+    printf("Thread %d: Finishing...\n", threadID);
+    return NULL;
+}
+
+int main() {
+    int numThreads = 3; // Number of threads to create
+    pthread_t threads[numThreads];
+    int threadArgs[numThreads];
+
+    // Create threads
+    for (int i = 0; i < numThreads; i++) {
+        threadArgs[i] = i + 1;
+        printf("Main: Creating thread %d\n", i + 1);
+        if (pthread_create(&threads[i], NULL, threadFunction, &threadArgs[i]) != 0) {
+            perror("Failed to create thread");
+            exit(1);
+        }
+    }
+
+    // Wait for threads to complete
+    for (int i = 0; i < numThreads; i++) {
+        if (pthread_join(threads[i], NULL) != 0) {
+            perror("Failed to join thread");
+            exit(1);
+        }
+    }
+
+    printf("Main: All threads have finished.\n");
+    return 0;
+}
