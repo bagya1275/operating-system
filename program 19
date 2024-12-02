@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_mutex_t mutex;  // Mutex lock
+int shared_resource = 0;  // Shared resource
+
+// Function for the critical section
+void *increment_resource(void *arg) {
+    int id = *(int *)arg;
+
+    // Lock the mutex before entering the critical section
+    pthread_mutex_lock(&mutex);
+
+    printf("Thread %d entering critical section.\n", id);
+    int temp = shared_resource;
+    sleep(1);  // Simulate some work
+    shared_resource = temp + 1;
+    printf("Thread %d incremented resource to %d.\n", id, shared_resource);
+
+    // Unlock the mutex after leaving the critical section
+    pthread_mutex_unlock(&mutex);
+
+    printf("Thread %d leaving critical section.\n", id);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[5];
+    int thread_ids[5];
+
+    // Initialize the mutex
+    pthread_mutex_init(&mutex, NULL);
+
+    // Create threads
+    for (int i = 0; i < 5; i++) {
+        thread_ids[i] = i + 1;
+        pthread_create(&threads[i], NULL, increment_resource, &thread_ids[i]);
+    }
+
+    // Wait for all threads to finish
+    for (int i = 0; i < 5; i++) {
+        pthread_join(threads[i], NULL);
+    }
+
+    // Destroy the mutex
+    pthread_mutex_destroy(&mutex);
+
+    printf("Final value of shared resource: %d\n", shared_resource);
+    return 0;
+}
